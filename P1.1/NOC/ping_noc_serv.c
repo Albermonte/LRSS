@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <signal.h>
 
 int sock;
@@ -27,14 +28,16 @@ void main(int argc, char *argv[])
     }
 
     // https://www.gnu.org/software/libc/manual/html_node/Socket-Addresses.html
-    // https://stackoverflow.com/questions/3689925/struct-sockaddr-un-vs-sockaddr
-    struct sockaddr server_address;
-    struct sockaddr client_address;
+    // https://www.gnu.org/software/libc/manual/html_node/Inet-Example.html
+    struct sockaddr_in server_address;
+    struct sockaddr_in client_address;
     int port = atoi(argv[1]);
     char data_received[1024];
 
     printf("Listening on %d\n", port);
 
+    signal(SIGINT, sig_handler);  // handle ctrl+c
+    signal(SIGTSTP, sig_handler); // handle ctrl+z
     // Create the socket.
     /**
      * socket(domain, type, protocol)
@@ -50,6 +53,10 @@ void main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    server_address.sin_family = AF_INET;                // IPv4 address family
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY); // Give the local machine address
+    server_address.sin_port = htons(port);              // Port at which server listens to the requests
+
     // Binding socket to specified port
     printf("Binding socket\n");
     if (bind(sock, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
@@ -57,9 +64,6 @@ void main(int argc, char *argv[])
         printf("Binding socket to port %d failed\n", port);
         exit(EXIT_FAILURE);
     }
-
-    signal(SIGINT, sig_handler);  // handle ctrl+c
-    signal(SIGTSTP, sig_handler); // handle ctrl+z
 
     // Receive msg from client
     // https://www.ibm.com/docs/en/zos/2.4.0?topic=sockets-using-sendto-recvfrom-calls
