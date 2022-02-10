@@ -42,19 +42,19 @@ void main(int argc, char *argv[])
      * type: SOCK_STREAM (TCP), SOCK_DGRAM (UDP)
      * protocol: 0 (IP), more at /etc/protocols
      */
-    printf("Creating socket");
-    sock = socket(PF_LOCAL, SOCK_DGRAM, 0);
+    printf("Creating socket\n");
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
     {
-        printf("Error creating socket");
+        printf("Error creating socket\n");
         exit(EXIT_FAILURE);
     }
 
     // Binding socket to specified port
-    printf("Binding socket");
+    printf("Binding socket\n");
     if (bind(sock, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
     {
-        printf("Binding socket to port %d failed", port);
+        printf("Binding socket to port %d failed\n", port);
         exit(EXIT_FAILURE);
     }
 
@@ -63,10 +63,10 @@ void main(int argc, char *argv[])
 
     // Receive msg from client
     // https://www.ibm.com/docs/en/zos/2.4.0?topic=sockets-using-sendto-recvfrom-calls
-    printf("Waiting for msg...");
+    printf("Waiting for msg...\n");
     if (recvfrom(sock, data_received, sizeof(data_received), 0, &client_address, sizeof(client_address)) < 0)
     {
-        printf("Error receiving data from client");
+        printf("Error receiving data from client\n");
         exit(EXIT_FAILURE);
     }
 
