@@ -31,6 +31,7 @@ void main(int argc, char *argv[])
     // https://www.gnu.org/software/libc/manual/html_node/Inet-Example.html
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
+    socklen_t addrlen = sizeof(client_address);
     int port = atoi(argv[1]);
     char data_received[1024];
 
@@ -68,13 +69,18 @@ void main(int argc, char *argv[])
     // Receive msg from client
     // https://www.ibm.com/docs/en/zos/2.4.0?topic=sockets-using-sendto-recvfrom-calls
     printf("Waiting for msg...\n");
-    if (recvfrom(sock, data_received, sizeof(data_received), 0, &client_address, sizeof(client_address)) < 0)
+    while (1)
     {
-        printf("Error receiving data from client\n");
-        exit(EXIT_FAILURE);
-    }
 
-    printf("Msg received:\n %s", data_received);
+        if (recvfrom(sock, data_received, 1024, 0, (struct sockaddr *)&client_address, &addrlen) < 0)
+        {
+            printf("Error receiving data from client\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("Msg received:\n %s", data_received);
+        memset(data_received, 0, sizeof(data_received)); // clear buffer
+    }
 }
 
 // https://tutorialspoint.dev/language/cpp/socket-programming-cc
