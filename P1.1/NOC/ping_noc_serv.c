@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
+#include <string.h>
 
 int sock;
 
@@ -13,7 +14,7 @@ void sig_handler(int signum)
     {
         printf("Closing %d", signum);
         close(sock);
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 }
 
@@ -29,16 +30,14 @@ void main(int argc, char *argv[])
 
     // https://www.gnu.org/software/libc/manual/html_node/Socket-Addresses.html
     // https://www.gnu.org/software/libc/manual/html_node/Inet-Example.html
-    struct sockaddr_in server_address;
-    struct sockaddr_in client_address;
+    struct sockaddr_in server_address, client_address;
     socklen_t addrlen = sizeof(client_address);
     int port = atoi(argv[1]);
     char data_received[1024];
+    memset(data_received, 0, sizeof(data_received)); // clear buffer
 
     printf("Listening on %d\n", port);
 
-    signal(SIGINT, sig_handler);  // handle ctrl+c
-    signal(SIGTSTP, sig_handler); // handle ctrl+z
     // Create the socket.
     /**
      * socket(domain, type, protocol)
@@ -53,6 +52,9 @@ void main(int argc, char *argv[])
         printf("Error creating socket\n");
         exit(EXIT_FAILURE);
     }
+
+    signal(SIGINT, sig_handler);  // handle ctrl+c
+    signal(SIGTSTP, sig_handler); // handle ctrl+z
 
     server_address.sin_family = AF_INET;                // IPv4 address family
     server_address.sin_addr.s_addr = htonl(INADDR_ANY); // Give the local machine address
@@ -78,7 +80,11 @@ void main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        printf("Msg received:\n %s", data_received);
+        printf("Msg received\n %s\n", data_received);
+
+        printf("Sending msg back\n");
+        sendto(sock, data_received, strlen(data_received), 0, (struct sockaddr *)&client_address, addrlen);
+
         memset(data_received, 0, sizeof(data_received)); // clear buffer
     }
 }
