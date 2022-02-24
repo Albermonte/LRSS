@@ -14,9 +14,9 @@ int sock;
 // https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
 void sig_handler(int signum)
 {
-    if (signum == SIGINT)
+    if (signum == SIGINT || signum == SIGTSTP)
     {
-        printf("Closing %d", signum);
+        printf("Closing %d\n", signum);
         close(sock);
         exit(EXIT_SUCCESS);
     }
@@ -93,11 +93,11 @@ void main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        memset(data_received, 0, sizeof(data_received)); // clear buffer
         gettimeofday(&stop, NULL);
         msecs = (double)(stop.tv_usec - start.tv_usec) / 1000;
-        printf("...ping %d finished, took: %f\n", msg_count, msecs);
+        printf("...ping %d finished, took: %f ms\n", msg_count, msecs);
         msg_count++;
+        memset(data_received, 0, sizeof(data_received)); // clear buffer
     }
 }
 

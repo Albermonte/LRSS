@@ -10,9 +10,9 @@ int sock;
 // https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
 void sig_handler(int signum)
 {
-    if (signum == SIGINT)
+    if (signum == SIGINT || signum == SIGTSTP)
     {
-        printf("Closing %d", signum);
+        printf("Closing %d\n", signum);
         close(sock);
         exit(EXIT_SUCCESS);
     }
@@ -80,9 +80,7 @@ void main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        printf("Msg received\n %s\n", data_received);
-
-        printf("Sending msg back\n");
+        printf("Msg received..\tSending msg back\n");
         sendto(sock, data_received, strlen(data_received), 0, (struct sockaddr *)&client_address, addrlen);
 
         memset(data_received, 0, sizeof(data_received)); // clear buffer
