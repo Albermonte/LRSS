@@ -1,3 +1,4 @@
+import signal
 import sys
 import socket
 import time
@@ -14,6 +15,14 @@ print(f"Running client on {HOST}:{PORT}")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
+
+def sig_handler(signum, frame):
+    print("\nClosing socket...")
+    sock.close()
+    quit()
+
+
+signal.signal(signal.SIGINT, sig_handler)
 
 i = 0
 while i < MSG_AMOUNT:
