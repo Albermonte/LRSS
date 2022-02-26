@@ -37,7 +37,7 @@ void main(int argc, char *argv[])
 
     struct sockaddr_in server_address;
     socklen_t addrlen = sizeof(server_address);
-    char *server = strcmp(argv[1], "localhost") ? argv[1] : "127.0.0.1";
+    char *server = strcmp(argv[1], "localhost") ? argv[1] : "127.0.0.1"; // TODO: usar https://man7.org/linux/man-pages/man3/gethostbyname.3.html
     int port = atoi(argv[2]);
     char data_received[1024];
     memset(data_received, 0, sizeof(data_received)); // clear buffer

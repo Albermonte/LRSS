@@ -8,6 +8,7 @@
 
 int sock;
 
+// https://ubidots.com/blog/how-to-simulate-a-tcpudp-client-using-netcat/
 // https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
 void sig_handler(int signum)
 {
