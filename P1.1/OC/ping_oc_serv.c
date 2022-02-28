@@ -80,6 +80,7 @@ void main(int argc, char *argv[])
 
     printf("Waiting for msg...\n");
     int new_socket, valread;
+
     while (1)
     {
         if ((new_socket = accept(sock, (struct sockaddr *)&server_address, (socklen_t *)&addrlen)) < 0)
@@ -87,12 +88,17 @@ void main(int argc, char *argv[])
             printf("Eror %d", new_socket);
             exit(EXIT_FAILURE);
         }
-        // TODO: Check if data_received is correct
-        valread = read(new_socket, data_received, 1024);
+        while (1)
+        {
+            // TODO: Check if data_received is correct
+            valread = read(new_socket, data_received, 1024);
+            if (!valread)
+                break;
 
-        printf("Msg received..\tSending msg back\n");
+            printf("Msg received..\tSending msg back\n");
 
-        send(new_socket, data_received, strlen(data_received), 0);
-        memset(data_received, 0, sizeof(data_received)); // clear buffer
+            send(new_socket, data_received, strlen(data_received), 0);
+            memset(data_received, 0, sizeof(data_received)); // clear buffer
+        }
     }
 }
