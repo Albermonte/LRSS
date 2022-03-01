@@ -1,10 +1,10 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 int sock;
 
@@ -95,6 +95,9 @@ void main(int argc, char *argv[])
                 break;
 
             printf("Msg received..\tSending msg back\n");
+
+            // Uncomment to check if client verification works
+            // strcpy(data_received, "b");
 
             send(new_socket, data_received, strlen(data_received), 0);
             memset(data_received, 0, sizeof(data_received)); // clear buffer

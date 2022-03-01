@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 int sock;
 
@@ -81,6 +82,10 @@ void main(int argc, char *argv[])
         }
 
         printf("Msg received..\tSending msg back\n");
+
+        // Uncomment to check if client verification works
+        // strcpy(data_received, "b");
+
         sendto(sock, data_received, strlen(data_received), 0, (struct sockaddr *)&client_address, addrlen);
 
         memset(data_received, 0, sizeof(data_received)); // clear buffer

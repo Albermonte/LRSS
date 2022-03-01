@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <netdb.h>
 #include <ctype.h>
@@ -98,19 +99,26 @@ void main(int argc, char *argv[])
     double time[MSG_AMOUNT];
     struct timeval start, stop;
     double msecs = 0;
+    char *msg = "a";
 
+    // TODO: Mean time, total time, etc
     while (msg_count < MSG_AMOUNT)
     {
         printf("Sending ping %d...\t", msg_count);
         // Send udp packet to server
         gettimeofday(&start, NULL);
-        sendto(sock, "a", strlen("a"), 0, (struct sockaddr *)&server_address, addrlen);
+        sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&server_address, addrlen);
 
         // Wait for the reply from the server
         if (recvfrom(sock, data_received, 1024, 0, (struct sockaddr *)&server_address, &addrlen) < 0)
-        // TODO: guardar en buffer y comprobar si longitud de paquete de envio y recivo es igual
         {
-            printf("Error receiving data from client\n");
+            printf("Error receiving data from server\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if (strcmp(msg, data_received))
+        {
+            printf("Data received from server is not consistent\n");
             exit(EXIT_FAILURE);
         }
 

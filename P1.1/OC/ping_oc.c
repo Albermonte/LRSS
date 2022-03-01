@@ -96,15 +96,21 @@ void main(int argc, char *argv[])
     double time[MSG_AMOUNT];
     struct timeval start, stop;
     double msecs = 0;
+    char *msg = "a";
 
     while (msg_count < MSG_AMOUNT)
     {
         printf("Sending ping %d...\t", msg_count);
         // Send udp packet to server
         gettimeofday(&start, NULL);
-        send(sock, "a", strlen("a"), 0);
-        // TODO: verify data_received
+        send(sock, msg, strlen(msg), 0);
         valread = read(sock, data_received, 1024);
+
+        if (strcmp(msg, data_received))
+        {
+            printf("Data received from server is not consistent\n");
+            exit(EXIT_FAILURE);
+        }
 
         gettimeofday(&stop, NULL);
         msecs = (double)(stop.tv_usec - start.tv_usec) / 1000;
