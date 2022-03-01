@@ -90,7 +90,6 @@ void main(int argc, char *argv[])
         }
         while (1)
         {
-            // TODO: Check if data_received is correct
             valread = read(new_socket, data_received, 1024);
             if (!valread)
                 break;

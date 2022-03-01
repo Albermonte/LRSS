@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <string.h>
 #include <sys/time.h>
+#include <netdb.h>
 
 #define MSG_AMOUNT 3
 
@@ -37,7 +38,7 @@ void main(int argc, char *argv[])
 
     struct sockaddr_in server_address, client_address;
     socklen_t addrlen = sizeof(server_address);
-    char *server = strcmp(argv[1], "localhost") ? argv[1] : "127.0.0.1"; // TODO: usar https://man7.org/linux/man-pages/man3/gethostbyname.3.html
+    char *server = strcmp(argv[1], "localhost") ? argv[1] : "127.0.0.1";
     int port = atoi(argv[2]);
     char data_received[1024];
     memset(data_received, 0, sizeof(data_received)); // clear buffer
@@ -72,6 +73,18 @@ void main(int argc, char *argv[])
         printf("inet_aton failed");
         exit(EXIT_FAILURE);
     }
+
+    // Get IP from host
+    char str[INET6_ADDRSTRLEN];
+    struct addrinfo *hostname = NULL;
+    struct addrinfo hints;
+    getaddrinfo(argv[1], argv[2], &hints, &hostname);
+    if (!hostname)
+    {
+        printf("Can't resolve hostname %s\n", argv[1]);
+    }
+    struct sockaddr_in *p = (struct sockaddr_in *)hostname->ai_addr;
+    printf("Ping to %s\n", inet_ntop(AF_INET, &p->sin_addr, str, sizeof(str)));
 
     int msg_count = 0;
     double time[MSG_AMOUNT];
