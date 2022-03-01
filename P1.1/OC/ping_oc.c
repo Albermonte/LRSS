@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <netdb.h>
 
 #define MSG_AMOUNT 3
 
@@ -37,7 +38,6 @@ void main(int argc, char *argv[])
 
     struct sockaddr_in server_address;
     socklen_t addrlen = sizeof(server_address);
-    char *server = strcmp(argv[1], "localhost") ? argv[1] : "127.0.0.1"; // TODO: usar https://man7.org/linux/man-pages/man3/gethostbyname.3.html
     int port = atoi(argv[2]);
     char data_received[1024];
     memset(data_received, 0, sizeof(data_received)); // clear buffer
@@ -56,12 +56,13 @@ void main(int argc, char *argv[])
     server_address.sin_family = AF_INET;   // IPv4 address family
     server_address.sin_port = htons(port); // Port number at which the server is listning
 
-    // Converts the Internet host address cp from the IPv4 numbers-and-dots notation into binary form
-    if (inet_aton(server, &server_address.sin_addr) == 0)
+    // Get IP from host
+    struct hostent *hostname = gethostbyname(argv[1]);
+    if (!hostname)
     {
-        printf("inet_aton failed");
-        exit(EXIT_FAILURE);
+        printf("Can't resolve hostname %s\n", argv[1]);
     }
+    bcopy(hostname->h_addr, &server_address.sin_addr, hostname->h_length);
 
     if (connect(sock, (struct sockaddr *)&server_address, addrlen) < 0)
     {
