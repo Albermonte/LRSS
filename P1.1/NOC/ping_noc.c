@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <netdb.h>
+#include <ctype.h>
 
 #define MSG_AMOUNT 3
 
@@ -23,15 +24,34 @@ void sig_handler(int signum)
     }
 }
 
+int isNumber(char s[])
+{
+    printf("Checking port\n");
+    for (int i = 0; s[i] != '\0'; i++)
+    {
+        if (isdigit(s[i]) == 0)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 void main(int argc, char *argv[])
 {
     printf("## NOC CLIENT ## \n\n");
     if (argc < 3)
     {
-        // TODO: Mejora, comprobar es int o no, si primer arg es int, fallo
         printf("Missing params.\n");
         exit(EXIT_FAILURE);
     }
+
+    if (!isNumber(argv[2]))
+    {
+        printf("Port \"%s\" not recognized, usage: ./ping_noc.out host port\n", argv[2]);
+        exit(EXIT_FAILURE);
+    }
+
     printf("Pinging to: %s, %s \n", argv[1], argv[2]);
     printf("Press ENTER key to Continue\n");
     getchar();
@@ -66,7 +86,6 @@ void main(int argc, char *argv[])
     server_address.sin_family = AF_INET;   // IPv4 address family
     server_address.sin_port = htons(port); // Port number at which the server is listning
 
-
     // Get IP from host
     struct hostent *hostname = gethostbyname(argv[1]);
     if (!hostname)
@@ -74,7 +93,6 @@ void main(int argc, char *argv[])
         printf("Can't resolve hostname %s\n", argv[1]);
     }
     bcopy(hostname->h_addr, &server_address.sin_addr, hostname->h_length);
-    
 
     int msg_count = 0;
     double time[MSG_AMOUNT];
