@@ -48,7 +48,7 @@ void main(int argc, char *argv[])
 
     if (!isNumber(argv[2]))
     {
-        printf("Port \"%s\" not recognized, usage: ./ping_noc.out host port\n", argv[2]);
+        printf("Port \"%s\" not numeric, usage: ./ping_noc.out host port\n", argv[2]);
         exit(EXIT_FAILURE);
     }
 
@@ -60,7 +60,7 @@ void main(int argc, char *argv[])
     socklen_t addrlen = sizeof(server_address);
     int port = atoi(argv[2]);
     char data_received[1024];
-    memset(data_received, 0, sizeof(data_received)); // clear buffer
+    memset(data_received, 0, sizeof(data_received)); // Clear buffer
 
     printf("Creating socket\n");
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -89,22 +89,26 @@ void main(int argc, char *argv[])
         printf("Connection failed\n");
         exit(EXIT_FAILURE);
     }
-    printf("Connection successful\n");
+    printf("Connection successful\n\n");
 
     int msg_count = 0,
         valread;
     double time[MSG_AMOUNT];
     struct timeval start, stop;
     double msecs = 0;
+    double total_time = 0;
     char *msg = "a";
 
+    printf("Pinging to %s with a total of %ld bytes:\n\n", argv[1], strlen(msg) * MSG_AMOUNT);
     while (msg_count < MSG_AMOUNT)
     {
-        printf("Sending ping %d...\t", msg_count);
+        // 1 char = 1 byte
+        printf("Sending ping %d of %ld bytes...\t", msg_count, strlen(msg));
         // Send udp packet to server
         gettimeofday(&start, NULL);
         send(sock, msg, strlen(msg), 0);
         valread = read(sock, data_received, 1024);
+        gettimeofday(&stop, NULL);
 
         if (strcmp(msg, data_received))
         {
@@ -112,12 +116,12 @@ void main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        gettimeofday(&stop, NULL);
         msecs = (double)(stop.tv_usec - start.tv_usec) / 1000;
         printf("...ping %d finished, took: %f ms\n", msg_count, msecs);
+        total_time += msecs;
         msg_count++;
-        memset(data_received, 0, sizeof(data_received)); // clear buffer
+        memset(data_received, 0, sizeof(data_received)); // Clear buffer
     }
-}
 
-// Mejoras: multihilo? enviar identificador por mensaje
+    printf("\n## Total Time for %d pings: %f ms, Mean: %f ms ##\n\n", msg_count, total_time, (total_time / msg_count));
+}

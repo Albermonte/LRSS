@@ -36,7 +36,7 @@ void main(int argc, char *argv[])
     socklen_t addrlen = sizeof(server_address);
     int port = atoi(argv[1]);
     char data_received[1024];
-    memset(data_received, 0, sizeof(data_received)); // clear buffer
+    memset(data_received, 0, sizeof(data_received)); // Clear buffer
 
     printf("Listening on %d\n", port);
 
@@ -100,7 +100,7 @@ void main(int argc, char *argv[])
             // strcpy(data_received, "b");
 
             send(new_socket, data_received, strlen(data_received), 0);
-            memset(data_received, 0, sizeof(data_received)); // clear buffer
+            memset(data_received, 0, sizeof(data_received)); // Clear buffer
         }
     }
 }

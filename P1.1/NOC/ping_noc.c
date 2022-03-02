@@ -49,7 +49,7 @@ void main(int argc, char *argv[])
 
     if (!isNumber(argv[2]))
     {
-        printf("Port \"%s\" not recognized, usage: ./ping_noc.out host port\n", argv[2]);
+        printf("Port \"%s\" not numeric, usage: ./ping_noc.out host port\n", argv[2]);
         exit(EXIT_FAILURE);
     }
 
@@ -61,7 +61,7 @@ void main(int argc, char *argv[])
     socklen_t addrlen = sizeof(server_address);
     int port = atoi(argv[2]);
     char data_received[1024];
-    memset(data_received, 0, sizeof(data_received)); // clear buffer
+    memset(data_received, 0, sizeof(data_received)); // Clear buffer
 
     printf("Creating socket\n");
     sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -77,7 +77,7 @@ void main(int argc, char *argv[])
     client_address.sin_family = AF_INET;                // IPv4 address family
     client_address.sin_addr.s_addr = htonl(INADDR_ANY); // Give the local machine address
 
-    printf("Binding socket\n");
+    printf("Binding socket\n\n");
     if (bind(sock, (struct sockaddr *)&client_address, sizeof(client_address)) < 0)
     {
         printf("Binding socket failed\n");
@@ -99,12 +99,15 @@ void main(int argc, char *argv[])
     double time[MSG_AMOUNT];
     struct timeval start, stop;
     double msecs = 0;
+    double total_time = 0;
     char *msg = "a";
 
-    // TODO: Mean time, total time, etc
+    printf("Pinging to %s with a total of %ld bytes:\n\n", argv[1], strlen(msg) * MSG_AMOUNT);
     while (msg_count < MSG_AMOUNT)
     {
-        printf("Sending ping %d...\t", msg_count);
+        // 1 char = 1 byte
+        printf("Sending ping %d of %ld bytes...\t", msg_count, strlen(msg));
+
         // Send udp packet to server
         gettimeofday(&start, NULL);
         sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&server_address, addrlen);
@@ -115,6 +118,7 @@ void main(int argc, char *argv[])
             printf("Error receiving data from server\n");
             exit(EXIT_FAILURE);
         }
+        gettimeofday(&stop, NULL);
 
         if (strcmp(msg, data_received))
         {
@@ -122,12 +126,12 @@ void main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        gettimeofday(&stop, NULL);
         msecs = (double)(stop.tv_usec - start.tv_usec) / 1000;
         printf("...ping %d finished, took: %f ms\n", msg_count, msecs);
+        total_time += msecs;
         msg_count++;
-        memset(data_received, 0, sizeof(data_received)); // clear buffer
+        memset(data_received, 0, sizeof(data_received)); // Clear buffer
     }
-}
 
-// Mejoras: multihilo? enviar identificador por mensaje
+    printf("\n## Total Time for %d pings: %f ms, Mean: %f ms ##\n\n", msg_count, total_time, (total_time / msg_count));
+}

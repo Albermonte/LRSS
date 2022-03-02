@@ -35,7 +35,7 @@ void main(int argc, char *argv[])
     socklen_t addrlen = sizeof(client_address);
     int port = atoi(argv[1]);
     char data_received[1024];
-    memset(data_received, 0, sizeof(data_received)); // clear buffer
+    memset(data_received, 0, sizeof(data_received)); // Clear buffer
 
     printf("Listening on %d\n", port);
 
@@ -88,7 +88,7 @@ void main(int argc, char *argv[])
 
         sendto(sock, data_received, strlen(data_received), 0, (struct sockaddr *)&client_address, addrlen);
 
-        memset(data_received, 0, sizeof(data_received)); // clear buffer
+        memset(data_received, 0, sizeof(data_received)); // Clear buffer
     }
 }
 
