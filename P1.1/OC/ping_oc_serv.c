@@ -1,3 +1,5 @@
+// ping_oc_serv.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -8,8 +10,6 @@
 
 int sock;
 
-// https://ubidots.com/blog/how-to-simulate-a-tcpudp-client-using-netcat/
-// https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
 void sig_handler(int signum)
 {
     if (signum == SIGINT || signum == SIGTSTP)
@@ -20,7 +20,6 @@ void sig_handler(int signum)
     }
 }
 
-// https://www.gnu.org/software/libc/manual/html_node/Local-Socket-Example.html
 void main(int argc, char *argv[])
 {
     printf("## OC SERVER ## \n\n");
@@ -30,8 +29,6 @@ void main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // https://www.gnu.org/software/libc/manual/html_node/Socket-Addresses.html
-    // https://www.gnu.org/software/libc/manual/html_node/Inet-Example.html
     struct sockaddr_in server_address;
     socklen_t addrlen = sizeof(server_address);
     int port = atoi(argv[1]);
@@ -70,8 +67,9 @@ void main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // The backlog argument defines the maximum length to which the
-    // queue of pending connections for sockfd may grow
+    // En esta ocasión quedamos a la escucha para más tarde aceptar la conexión desde el servidor
+    // El segundo argumento define el número máximo de conexiones que habrá en cola
+    // En este caso este argumento nos da igual ya que solo habrá 1
     if ((listen(sock, 3)) < 0)
     {
         printf("Listen failed\n");
@@ -83,6 +81,8 @@ void main(int argc, char *argv[])
 
     while (1)
     {
+        // Esperamos a la conexión desde el cliente, dentro de un while para poder escuchar a más
+        // clientes una vez el actual se desconecte
         if ((new_socket = accept(sock, (struct sockaddr *)&server_address, (socklen_t *)&addrlen)) < 0)
         {
             printf("Eror %d", new_socket);
@@ -90,17 +90,30 @@ void main(int argc, char *argv[])
         }
         while (1)
         {
+            // Esperamos a los parques enviados por el cliente
             valread = read(new_socket, data_received, 1024);
+            // Si no obtenemos nada salimos del bucle
             if (!valread)
                 break;
 
             printf("Msg received..\tSending msg back\n");
 
-            // Uncomment to check if client verification works
+            // Des comentar la siguiente línea para ver si la verificación del cliente funciona
             // strcpy(data_received, "b");
 
+            // Reenviamos lo recibido de nuevo hacia el cliente ("pong")
             send(new_socket, data_received, strlen(data_received), 0);
             memset(data_received, 0, sizeof(data_received)); // Clear buffer
         }
     }
+
+    close(sock);
 }
+
+// Fuentes:
+// https://www.gnu.org/software/libc/manual/html_node/Local-Socket-Example.html
+// https://ubidots.com/blog/how-to-simulate-a-tcpudp-client-using-netcat/
+// https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
+// https://www.gnu.org/software/libc/manual/html_node/Socket-Addresses.html
+// https://www.gnu.org/software/libc/manual/html_node/Inet-Example.html
+// https://github.com/dheeraj-2000/task2_computernetworks/blob/master/Multithreaded_TCP_Server_Client/server.cpp

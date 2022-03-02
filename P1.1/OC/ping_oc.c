@@ -1,3 +1,5 @@
+// ping_oc.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -13,7 +15,6 @@
 
 int sock;
 
-// https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
 void sig_handler(int signum)
 {
     if (signum == SIGINT || signum == SIGTSTP)
@@ -26,7 +27,6 @@ void sig_handler(int signum)
 
 int isNumber(char s[])
 {
-    printf("Checking port\n");
     for (int i = 0; s[i] != '\0'; i++)
     {
         if (isdigit(s[i]) == 0)
@@ -84,6 +84,7 @@ void main(int argc, char *argv[])
     }
     bcopy(hostname->h_addr, &server_address.sin_addr, hostname->h_length);
 
+    // Al ser TCP tenemos que conectarnos primero al servidor antes de enviar paquetes
     if (connect(sock, (struct sockaddr *)&server_address, addrlen) < 0)
     {
         printf("Connection failed\n");
@@ -104,9 +105,10 @@ void main(int argc, char *argv[])
     {
         // 1 char = 1 byte
         printf("Sending ping %d of %ld bytes...\t", msg_count, strlen(msg));
-        // Send udp packet to server
         gettimeofday(&start, NULL);
+        // Una vez conectados, enviamos el mensaje
         send(sock, msg, strlen(msg), 0);
+        // Esperamos a la respuesta del servidor
         valread = read(sock, data_received, 1024);
         gettimeofday(&stop, NULL);
 
@@ -124,4 +126,10 @@ void main(int argc, char *argv[])
     }
 
     printf("\n## Total Time for %d pings: %f ms, Mean: %f ms ##\n\n", msg_count, total_time, (total_time / msg_count));
+
+    close(sock);
 }
+
+// Fuentes:
+// https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
+// https://github.com/dheeraj-2000/task2_computernetworks/blob/master/Multithreaded_TCP_Server_Client/server.cpp

@@ -1,3 +1,5 @@
+# ping_oc.py
+
 import signal
 import sys
 import socket
@@ -18,7 +20,9 @@ MSG_AMOUNT = 3
 
 print(f"Running client on {HOST}:{PORT}\n")
 
+# SOCK_STREAM ya que es TCP
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Al ser TCP tenemos que conectarnos primero al servidor antes de enviar paquetes
 sock.connect((HOST, PORT))
 
 
@@ -40,8 +44,11 @@ print(
 while i < MSG_AMOUNT:
     print(f"Sending ping {i} of {sys.getsizeof(msg)} bytes...\t", end='')
     start = time.perf_counter_ns()
+    # Una vez conectados, enviamos el mensaje
     sock.sendall(b"a")
+    # Esperamos a la respuesta del servidor
     data = sock.recv(1024)
+    # Si no obtenemos nada salimos del bucle
     if not data:
         break
     end = time.perf_counter_ns()
