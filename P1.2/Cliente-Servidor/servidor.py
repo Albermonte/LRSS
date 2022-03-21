@@ -55,7 +55,6 @@ def receive_message(client_socket: socket.socket):
         # }
 
         # Receive our "header" containing message length, it's size is defined and constant
-        # TODO: Check if message + username + data > 1024
         data = client_socket.recv(1024)
         # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
         if not len(data):
@@ -91,11 +90,10 @@ while True:
         if notified_socket == sock:
 
             # Accept new connection
-            # That gives us new socket - client socket, connected to this given client only, it's unique for that client
-            # The other returned object is ip/port set
+            # That gives us the client socket and the ip/port
             client_socket, client_address = sock.accept()
 
-            # Client should send his name right away, receive it
+            # The next message is the client username with the connecting message
             user = receive_message(client_socket)
 
             # If False - client disconnected before he sent his name
@@ -109,7 +107,18 @@ while True:
             client_list[client_socket] = user
 
             print(
-                f"Accepted new connection from {client_address} username: {user['username']}")
+                f"Accepted new connection from {client_address} with username: {user['username']}")
+
+            # Feature: Send message to all clients about new client connected
+            client_socket: socket.socket
+            for client_socket in client_list:
+                data = {
+                    "username": user['username'],
+                    "message": "Entered the chat!"
+                }
+                data = json.dumps(data)
+                data = bytes(data, "utf-8")
+                client_socket.send(data)
 
         # Else existing socket is sending a message
         else:
@@ -121,6 +130,19 @@ while True:
             if message is False:
                 print(
                     f"Closed connection from: {client_list[notified_socket]['username']}")
+                # Feature: Send message to all clients about client disconnected
+                client_socket: socket.socket
+                for client_socket in client_list:
+
+                    # But don't sent it to sender
+                    if client_socket != notified_socket:
+                        data = {
+                            "username": user['username'],
+                            "message": "Left the chat!"
+                        }
+                        data = json.dumps(data)
+                        data = bytes(data, "utf-8")
+                        client_socket.send(data)
 
                 # Remove from list for socket.socket()
                 sockets_list.remove(notified_socket)
@@ -143,8 +165,6 @@ while True:
                 # But don't sent it to sender
                 if client_socket != notified_socket:
 
-                    # Send user and message (both with their headers)
-                    # We are reusing here message header sent by sender, and saved username header send by user when he connected
                     data = {
                         "username": user['username'],
                         "message": message['message']
@@ -166,8 +186,3 @@ while True:
 # Sources:
 # https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # https://mirdan.medium.com/send-json-with-python-socket-f1107876f50e
-
-# Posible mejora:   cifrar mensajes
-#                   salas de chat con codigo
-
-# TODO: Hacer script test para enviar datos usando netcat como cliente

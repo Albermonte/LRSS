@@ -5,11 +5,11 @@ import select
 import socket
 import json
 
+
 def delete_last_line():
-    #cursor up one line
-    # sys.stdout.write('\x1b[1A')
-    #delete last line
+    # Delete last line from stdout
     sys.stdout.write('\x1b[2K')
+
 
 if len(sys.argv) < 3:
     print("Missing params.\n")
@@ -39,32 +39,38 @@ def sig_handler(signum, frame):
 
 signal.signal(signal.SIGINT, sig_handler)
 
+# Ask user for username
 username = input("Enter your username: ")
 if not username:
     username = "Anonymous"
 print(f"You choosed {username} as username \n\n")
 
+# First message for server
 data = {
     "username": username,
     "message": "connecting"
 }
+# Convert to json and send
 data_send = json.dumps(data)
 data_send = bytes(data_send, "utf-8")
 
 sock.send(data_send)
 
 print("###### Connected ######\n\n")
+# flush=True to avoid errors, without it this line was not printed
 print("You > ", end="", flush=True)
 
 
 while True:
     # Feature: Non blocking input, receive messages while typing
-    is_input, o, e = select.select([sys.stdin], [], [], 0) 
+    is_input, _, _ = select.select([sys.stdin], [], [], 0)
 
     if is_input:
         message = sys.stdin.readline().strip()
 
+        # If not message (eg: \n) don't send it
         if message:
+            # TODO: Check if message + username + data > 1024
             data["message"] = message
             # print(f"Sending {data}")
             data_send = json.dumps(data)
@@ -75,12 +81,15 @@ while True:
     try:
         while True:
             data_received = sock.recv(1024)
+            # The server was closed
             if not len(data_received):
                 print("Connection lost")
                 sig_handler(0, 0)
 
+            # Convert string to json
             data_received = data_received.decode('utf-8')
             data_received = json.loads(data_received)
+            # Delete last line and print data, this will replace "You >" with another client message
             delete_last_line()
             print(f"{data_received['username']} : {data_received['message']}")
             print("You > ", end="", flush=True)
