@@ -54,7 +54,6 @@ def receive_message(client_socket: socket.socket):
         #     "message": ""
         # }
 
-        # Receive our "header" containing message length, it's size is defined and constant
         data = client_socket.recv(1024)
         # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
         if not len(data):
