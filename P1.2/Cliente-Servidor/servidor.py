@@ -1,3 +1,5 @@
+# servidor.py
+
 import sys
 import signal
 import socket

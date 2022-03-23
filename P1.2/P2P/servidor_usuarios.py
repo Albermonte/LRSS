@@ -1,3 +1,5 @@
+# servidor_usuarios.py
+
 import sys
 import signal
 import socket
@@ -94,13 +96,11 @@ while True:
             client_list[client_socket] = user
 
             # Save connection
-            client_connections_list[user["username"]
-                                    ] = client_socket.getpeername()
+            client_connections_list[user["username"]] = client_socket.getpeername()
 
             print(
                 f"Accepted new connection from {client_address} with username: {user['username']}")
 
-            # Feature: Send message to all clients about new client connected
             client_socket: socket.socket
             for client_socket in client_list:
                 # Send list of servers

@@ -1,4 +1,5 @@
-import errno
+# peer.py
+
 import signal
 import sys
 import select
@@ -32,7 +33,7 @@ print(f"Running client on {HOST}:{PORT}\n")
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
 # Set recv to not blocking so we can do things while waiting for msg
-sock.setblocking(False)
+# sock.setblocking(False)
 
 
 def sig_handler(signum, frame):
@@ -68,9 +69,12 @@ client_connections_list = {}
 
 
 while True:
+    read_sockets, _, exception_sockets = select.select(
+        sockets_list, [], sockets_list)
 
-    try:
-        while True:
+    for notified_socket in read_sockets:
+
+        if notified_socket == sock:
             data_received = sock.recv(1024)
             # The server was closed
             if not len(data_received):
@@ -80,48 +84,24 @@ while True:
             # Convert string to json
             data_received = data_received.decode('utf-8')
             data_received = json.loads(data_received)
-            print(data_received)
-            try:
-                a = data_received["username"]
-                pass
-            except:
+            if data_received[username]:
                 del data_received[username]
                 client_connections_list = data_received
+                print(client_connections_list)
                 for client_name in client_connections_list:
                     conn = client_connections_list[client_name]
                     ip = conn[0]
                     port = conn[1]
                     print("Listening...")
-                    # server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    # server_sock.bind()
-                    # server_sock.listen()
-                    # TODO: bind to sport?
-                    # new_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    # new_sock.connect((ip, port))
-                    data = {
-                        "username": username,
-                        "message": "Hola"
-                    }
-                    # Convert to json and send
-                    data_send = json.dumps(data)
-                    data_send = bytes(data_send, "utf-8")
-                    sock.sendto(data_send, (ip, port))
-                    # Connect to other sockets
-                    # Save in sockets_list
-                    # Do the same as server did
+                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    # TODO: Address already in use
+                    print(f"Port: {port}")
+                    server_socket.bind((ip, port)) 
+                    server_socket.listen()
+                    sockets_list.append(server_socket)
+            else:
+                # Message from client
+                pass
 
-    except IOError as e:
-        # This is normal on non blocking connections - when there are no incoming data error is going to be raised
-        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-            print(f"Reading error: {str(e)}")
-            sys.exit()
-
-        # We just did not receive anything
-        continue
-
-    except Exception as e:
-        # Any other exception - something happened, exit
-        print(f"Reading error: {str(e)}")
-        sig_handler(0, 0)
 
 # Source: https://github.com/engineer-man/youtube/blob/master/141/client.py

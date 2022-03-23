@@ -1,3 +1,5 @@
+# cliente.py
+
 import errno
 import signal
 import sys
