@@ -1,5 +1,6 @@
 # peer.py
 
+import errno
 import signal
 import sys
 import select
@@ -23,6 +24,7 @@ if not sys.argv[2].isnumeric():
 
 HOST = sys.argv[1]
 PORT = int(sys.argv[2])
+RECV_BUFFER = 1024
 
 print(f"Running client on {HOST}:{PORT}\n")
 
@@ -35,11 +37,76 @@ sock.connect((HOST, PORT))
 # Set recv to not blocking so we can do things while waiting for msg
 # sock.setblocking(False)
 
+sock_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Assigning free port https://stackoverflow.com/a/1365284/7312697
+sock_server.bind(("", 0))
+# Reuse address, no more address already in use error
+sock_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+# sock_server.setblocking(False)
+sock_server.listen(50)
+print(f"Socket server on: {sock_server.getsockname()}")
+
 
 def sig_handler(signum, frame):
     print("\nClosing socket...")
     sock.close()
+    # TODO: Close all open sockets
     quit()
+
+
+def delete_last_line():
+    # Delete last line from stdout
+    sys.stdout.write('\x1b[2K')
+
+
+def receive_message(client_socket: socket.socket):
+    try:
+        data = client_socket.recv(RECV_BUFFER)
+        # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+        if not len(data):
+            return False
+
+        data = data.decode('utf-8')
+        data = json.loads(data)
+
+        return data
+
+    except Exception as e:
+        print("Error receiving msg")
+        print(e)
+        # Some error or disconection
+        return False
+
+
+def connect_to_peers(sock: socket.socket):
+    data_received = sock.recv(RECV_BUFFER)
+    # The server was closed
+    if not len(data_received):
+        print("Connection lost")
+        sig_handler(0, 0)
+
+    # Convert string to json
+    data_received = data_received.decode('utf-8')
+    data_received = json.loads(data_received)
+    # Deleting our peer
+    if data_received[username]:
+        del data_received[username]
+    client_connections_list = data_received
+    print(client_connections_list)
+    for client_name in client_connections_list:
+        conn = client_connections_list[client_name]
+        ip = conn[0]
+        port = conn[1]
+        print(f"Connecting to {ip}:{port}")
+        new_socket = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            new_socket.connect((ip, port))
+            peer_list.append(new_socket)
+        except Exception as e:
+            print(f"Error connecting to {ip}:{port}")
+            print(str(e))
+            new_socket.close()
 
 
 signal.signal(signal.SIGINT, sig_handler)
@@ -53,7 +120,7 @@ print(f"You choosed {username} as username \n\n")
 # First message for server
 data = {
     "username": username,
-    "message": "connecting"
+    "port": sock_server.getsockname()[1]
 }
 # Convert to json and send
 data_send = json.dumps(data)
@@ -61,47 +128,48 @@ data_send = bytes(data_send, "utf-8")
 
 sock.send(data_send)
 
-print("###### Connected ######\n\n")
-
-sockets_list = [sock]
-client_list = {}
+sockets_list = [sock_server, sys.stdin]
+peer_list = []
 client_connections_list = {}
 
+print("Connecting to peers")
+
+connect_to_peers(sock)
+
+print("###### Connected ######\n\n")
+print("You > ", end="", flush=True)
 
 while True:
     read_sockets, _, exception_sockets = select.select(
-        sockets_list, [], sockets_list)
+        sockets_list, [], [])
 
     for notified_socket in read_sockets:
 
-        if notified_socket == sock:
-            data_received = sock.recv(1024)
-            # The server was closed
-            if not len(data_received):
-                print("Connection lost")
-                sig_handler(0, 0)
+        if notified_socket == sock_server:
+            # Some client is sending a message
+            client_socket, client_address = sock_server.accept()
+            # Receive message
+            sockets_list.append(client_socket)
+            print(f"New peer connected {client_socket.getsockname()}")
+            # TODO: Connect to peer server
 
-            # Convert string to json
-            data_received = data_received.decode('utf-8')
-            data_received = json.loads(data_received)
-            if data_received[username]:
-                del data_received[username]
-                client_connections_list = data_received
-                print(client_connections_list)
-                for client_name in client_connections_list:
-                    conn = client_connections_list[client_name]
-                    ip = conn[0]
-                    port = conn[1]
-                    print("Listening...")
-                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    # TODO: Address already in use
-                    print(f"Port: {port}")
-                    server_socket.bind((ip, port)) 
-                    server_socket.listen()
-                    sockets_list.append(server_socket)
-            else:
-                # Message from client
-                pass
+        elif notified_socket == sys.stdin:
+            # Not a socket, instead it's the user writing something
+            message = sys.stdin.readline().strip()
 
-
-# Source: https://github.com/engineer-man/youtube/blob/master/141/client.py
+            # If not message (eg: \n) don't send it
+            if message:
+                # TODO: Check if message + username + data > RECV_BUFFER
+                data["message"] = message
+                # print(f"Sending {data}")
+                data_send = json.dumps(data)
+                data_send = bytes(data_send, "utf-8")
+                peer: socket.socket
+                for peer in peer_list:
+                    peer.send(data_send)
+                print("You > ", end="", flush=True)
+        else:
+            # Peer sending msg
+            message = receive_message(notified_socket)
+            # TODO: delete peer if disconnected
+            print(message)
