@@ -12,6 +12,7 @@ if len(sys.argv) < 2:
 
 PORT = int(sys.argv[1])
 print(f"Running server on Port: {PORT}")
+RECV_BUFFER = 1024
 
 # Socket TCP
 # Conect non-blockin
@@ -56,7 +57,7 @@ def receive_message(client_socket: socket.socket):
         #     "message": ""
         # }
 
-        data = client_socket.recv(1024)
+        data = client_socket.recv(RECV_BUFFER)
         # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
         if not len(data):
             return False

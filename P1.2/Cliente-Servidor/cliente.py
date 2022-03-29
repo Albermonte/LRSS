@@ -24,6 +24,7 @@ if not sys.argv[2].isnumeric():
 
 HOST = sys.argv[1]
 PORT = int(sys.argv[2])
+RECV_BUFFER = 1024
 
 print(f"Running client on {HOST}:{PORT}\n")
 
@@ -62,6 +63,7 @@ print("###### Connected ######\n\n")
 # flush=True to avoid errors, without it this line was not printed
 print("You > ", end="", flush=True)
 
+# TODO: Además de enviar texto, debe poderse enviar ficheros entre los diferentes miembros del chat.
 
 while True:
     # Feature: Non blocking input, receive messages while typing
@@ -82,7 +84,7 @@ while True:
 
     try:
         while True:
-            data_received = sock.recv(1024)
+            data_received = sock.recv(RECV_BUFFER)
             # The server was closed
             if not len(data_received):
                 print("Connection lost")
@@ -114,3 +116,4 @@ while True:
 #  https://repolinux.wordpress.com/2012/10/09/non-blocking-read-from-stdin-in-python/
 #  https://pythonprogramming.net/client-chatroom-sockets-tutorial-python-3/?completed=/server-chatroom-sockets-tutorial-python-3/
 #  https://stackoverflow.com/questions/21791621/taking-input-from-sys-stdin-non-blocking
+#  https://www.thepythoncode.com/article/send-receive-files-using-sockets-python
