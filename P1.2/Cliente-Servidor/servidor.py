@@ -63,11 +63,30 @@ def receive_message(client_socket: socket.socket):
             return False
 
         data = data.decode('utf-8')
-        # print(f"Message data: {data}")
-        data = json.loads(data)
+        print(f"Message data: {data}")
+        if not data.startswith("file-"):
+            data = json.loads(data)
+            return data
+        else:
+            filename = data.split("file-")[1] + ".temp"
+            # It's a file then, could be improved because here we will catch other errors :/
+            with open(filename, "wb") as f:
+                while True:
+                    # read 1024 bytes from the socket (receive)
+                    bytes_read = client_socket.recv(RECV_BUFFER)
+                    if not bytes_read:
+                        # TODO: Not working, not reaching here
+                        print("File received")
+                        break
+                    # write to the file the bytes we just received
+                    f.write(bytes_read)
+            # TODO: Not working, not reaching here
+            print(f"Filename: {filename}")
+            return filename
 
-        return data
-    except:
+    except Exception as e:
+        print("Error receiving msg")
+        print(e)
         # Some error or disconection
         return False
 
@@ -127,6 +146,7 @@ while True:
 
             # Receive message
             message = receive_message(notified_socket)
+            print(f"Message: {message}")
 
             # If False, client disconnected, cleanup
             if message is False:
@@ -157,8 +177,9 @@ while True:
             # Get user by notified socket, so we will know who sent the message
             user = client_list[notified_socket]
 
-            print(
-                f"Received message from {user['username']} : {message['message']}")
+            if not type(message) is dict:
+                print(
+                    f"Received message from {user['username']} : {message['message']}")
 
             # Iterate over connected clients and broadcast message
             client_socket: socket.socket
@@ -166,6 +187,20 @@ while True:
 
                 # But don't sent it to sender
                 if client_socket != notified_socket:
+
+                    if not type(message) is dict:
+                        sock.send(bytes(message, "utf-8"))
+                        with open(message, "rb") as f:
+                            print(f"Sending file {message}")
+                            while True:
+                                # Read the bytes from the file
+                                bytes_read = f.read(RECV_BUFFER)
+                                if not bytes_read:
+                                    # file transmitting is done
+                                    print("File sent")
+                                    break
+                                sock.sendall(bytes_read)
+                        continue
 
                     data = {
                         "username": user['username'],

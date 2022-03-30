@@ -6,11 +6,16 @@ import sys
 import select
 import socket
 import json
+from pathlib import Path
 
 
 def delete_last_line():
     # Delete last line from stdout
     sys.stdout.write('\x1b[2K')
+
+
+def is_file(path):
+    return Path(path).exists()
 
 
 if len(sys.argv) < 3:
@@ -63,7 +68,6 @@ print("###### Connected ######\n\n")
 # flush=True to avoid errors, without it this line was not printed
 print("You > ", end="", flush=True)
 
-# TODO: Además de enviar texto, debe poderse enviar ficheros entre los diferentes miembros del chat.
 
 while True:
     # Feature: Non blocking input, receive messages while typing
@@ -74,13 +78,26 @@ while True:
 
         # If not message (eg: \n) don't send it
         if message:
-            # TODO: Check if message + username + data > 1024
-            data["message"] = message
-            # print(f"Sending {data}")
-            data_send = json.dumps(data)
-            data_send = bytes(data_send, "utf-8")
-            sock.send(data_send)
-            print("You > ", end="", flush=True)
+            if is_file(message):
+                sock.send(bytes(f"file-{message}", "utf-8"))
+                with open(message, "rb") as f:
+                    print(f"Sending file {message}")
+                    while True:
+                        # Read the bytes from the file
+                        bytes_read = f.read(RECV_BUFFER)
+                        if not bytes_read:
+                            # file transmitting is done
+                            print("File sent")
+                            break
+                        sock.sendall(bytes_read)
+            else:
+                # TODO: Check if message + username + data > 1024
+                data["message"] = message
+                # print(f"Sending {data}")
+                data_send = json.dumps(data)
+                data_send = bytes(data_send, "utf-8")
+                sock.send(data_send)
+                print("You > ", end="", flush=True)
 
     try:
         while True:
