@@ -50,7 +50,6 @@ print(f"Socket server on: {sock_server.getsockname()}")
 def sig_handler(signum, frame):
     print("\nClosing socket...")
     sock.close()
-    # TODO: Close all open sockets
     quit()
 
 
@@ -102,7 +101,7 @@ def connect_to_peers(sock: socket.socket):
             socket.AF_INET, socket.SOCK_STREAM)
         try:
             new_socket.connect((ip, port))
-            peer_list.append(new_socket)
+            sockets_list.append(new_socket)
         except Exception as e:
             print(f"Error connecting to {ip}:{port}")
             print(str(e))
@@ -129,7 +128,6 @@ data_send = bytes(data_send, "utf-8")
 sock.send(data_send)
 
 sockets_list = [sock_server, sys.stdin]
-peer_list = []
 client_connections_list = {}
 
 print("Connecting to peers")
@@ -143,6 +141,7 @@ while True:
     read_sockets, _, exception_sockets = select.select(
         sockets_list, [], [])
 
+    notified_socket: socket.socket
     for notified_socket in read_sockets:
 
         if notified_socket == sock_server:
@@ -150,8 +149,9 @@ while True:
             client_socket, client_address = sock_server.accept()
             # Receive message
             sockets_list.append(client_socket)
+            delete_last_line()
             print(f"New peer connected {client_socket.getsockname()}")
-            # TODO: Connect to peer server
+            print("You > ", end="", flush=True)
 
         elif notified_socket == sys.stdin:
             # Not a socket, instead it's the user writing something
@@ -165,11 +165,21 @@ while True:
                 data_send = json.dumps(data)
                 data_send = bytes(data_send, "utf-8")
                 peer: socket.socket
-                for peer in peer_list:
-                    peer.send(data_send)
+                for peer in sockets_list:
+                    if peer != sock_server and peer != sys.stdin:
+                        peer.send(data_send)
                 print("You > ", end="", flush=True)
         else:
             # Peer sending msg
             message = receive_message(notified_socket)
-            # TODO: delete peer if disconnected
-            print(message)
+            if not message:
+                # Peer disconnected
+                delete_last_line()
+                print(f"Peer disconnected {notified_socket.getsockname()}")
+                print("You > ", end="", flush=True)
+                sockets_list.remove(notified_socket)
+                continue
+
+            delete_last_line()
+            print(f"{message['username']} : {message['message']}")
+            print("You > ", end="", flush=True)
