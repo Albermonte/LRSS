@@ -34,7 +34,7 @@ signal.signal(signal.SIGINT, sig_handler)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 print("Binding address and port")
-server_address = ('localhost', PORT)
+server_address = ('0.0.0.0', PORT)
 sock.bind(server_address)
 
 print("Listening...")
@@ -54,14 +54,13 @@ while True:
     req_file = result.group(1)
     if req_file == "/":
         req_file = "/index.html"
-    # TODO: diff between send and sendall
-    # TODO: create another ver with select but keep this one
 
     # Línea de estado que contiene la versión del protocolo HTTP (por ejemplo, versión 1.0), el código de
     # respuesta (por ejemplo 200) y una palabra/frase explicativa.
     # Una serie de cabeceras HTTP.
     # Una línea en blanco.
     # Objeto solicitado, en caso de que exista
+
     filename = "./public" + req_file
     res.send(filename)
 

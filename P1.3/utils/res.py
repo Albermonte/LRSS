@@ -50,3 +50,9 @@ class Res:
         headers = f"HTTP/1.1 404 Not Found\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
         self.conn.sendall(bytes(headers + body, "utf-8"))
         return
+
+    def test(self):
+        body = "<html><body>Hello World</body></html>"
+        headers = f"HTTP/1.1 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
+        self.conn.sendall(bytes(headers + body, "utf-8"))
+        return
