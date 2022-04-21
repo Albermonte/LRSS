@@ -36,7 +36,7 @@ signal.signal(signal.SIGINT, sig_handler)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 print("Binding address and port")
-server_address = ('localhost', PORT)
+server_address = ('0.0.0.0', PORT)
 sock.bind(server_address)
 
 print("Listening...")
