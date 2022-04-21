@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Granada",
+    "temp": "36",
+    "hum": "81",
+    "noise": "267",
+    "light": "168",
+    "color": "C1C8DC"
+  },
+  {
+    "name": "Guadalajara",
+    "temp": "22",
+    "hum": "15",
+    "noise": "96",
+    "light": "231",
+    "color": "E8ABEF"
+  },
+  {
+    "name": "Gran Canaria",
+    "temp": "16",
+    "hum": "36",
+    "noise": "114",
+    "light": "83",
+    "color": "320754"
+  },
+  {
+    "name": "Guadalupe",
+    "temp": "15",
+    "hum": "30",
+    "noise": "246",
+    "light": "46",
+    "color": "24F73"
+  },
+  {
+    "name": "Huelva",
+    "temp": "14",
+    "hum": "14",
+    "noise": "48",
+    "light": "186",
+    "color": "F04323"
+  }
+]

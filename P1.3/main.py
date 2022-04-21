@@ -1,10 +1,9 @@
 import sys
 import signal
 import socket
-import datetime
 import select
-import os
 import re
+from utils.res import Res
 
 
 if len(sys.argv) < 2:
@@ -44,36 +43,27 @@ sock.listen()
 while True:
     conn, addr = sock.accept()
     req = conn.recv(RECV_BUFFER).decode()
+    res = Res(conn)
     # print(req)
     result = re.search('GET (.*) HTTP/', req)
+    if not result:
+        res.not_found()
+        conn.close()
+        continue
+
     req_file = result.group(1)
     if req_file == "/":
         req_file = "/index.html"
     # TODO: diff between send and sendall
+    # TODO: create another ver with select but keep this one
+
     # Línea de estado que contiene la versión del protocolo HTTP (por ejemplo, versión 1.0), el código de
     # respuesta (por ejemplo 200) y una palabra/frase explicativa.
     # Una serie de cabeceras HTTP.
     # Una línea en blanco.
     # Objeto solicitado, en caso de que exista
     filename = "./public" + req_file
-    if os.path.exists(filename):
-        type = req_file.rsplit(".", 1)[1]
-        print(type)
-        regex = re.compile("/gif|jpe?g|bmp|png/ig")
-        print(re.search(regex, type))
-        if re.search("/gif|jpe?g|bmp|png/ig", type):
-            print(type)
-            headers = f"HTTP/1.1 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {os.path.getsize(filename)}\nConnection: close\n\n"
-            conn.sendall(bytes(headers, "utf-8"))
-            conn.sendall(bytes(open(filename, "rb").read()))
-        else:
-            headers = f"HTTP/1.1 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {os.path.getsize(filename)}\nConnection: close\n\n"
-            conn.sendall(bytes(headers, "utf-8"))
-            conn.sendall(bytes(open(filename, "rb").read()))
-    else:
-        body = "<html><body>404 Not Found</body></html>"
-        headers = f"HTTP/1.1 404 Not Found\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
-        conn.sendall(bytes(headers + body, "utf-8"))
+    res.send(filename)
 
     conn.close()
 

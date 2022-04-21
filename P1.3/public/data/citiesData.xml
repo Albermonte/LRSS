@@ -1,0 +1,42 @@
+<Cities>
+    <City>
+        <Name>El Escorial</Name>
+        <Temp>31</Temp>
+        <Hum>85</Hum>
+        <Noise>284</Noise>
+        <Light>264</Light>
+        <Color>904E70</Color>
+    </City>
+    <City>
+        <Name>Formentera</Name>
+        <Temp>26</Temp>
+        <Hum>46</Hum>
+        <Noise>252</Noise>
+        <Light>50</Light>
+        <Color>1177B3</Color>
+    </City>
+    <City>
+        <Name>Fuerteventura</Name>
+        <Temp>35</Temp>
+        <Hum>81</Hum>
+        <Noise>71</Noise>
+        <Light>282</Light>
+        <Color>CDF44D</Color>
+    </City>
+    <City>
+        <Name>Fuengirola</Name>
+        <Temp>23</Temp>
+        <Hum>24</Hum>
+        <Noise>108</Noise>
+        <Light>92</Light>
+        <Color>97D39A</Color>
+    </City>
+    <City>
+        <Name>Gijón</Name>
+        <Temp>30</Temp>
+        <Hum>67</Hum>
+        <Noise>77</Noise>
+        <Light>278</Light>
+        <Color>69381C</Color>
+    </City>
+</Cities>

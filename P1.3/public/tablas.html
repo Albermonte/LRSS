@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" manifest="manifest.appcache">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tablas</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  </head>
+  <body>
+    <header class="text-center bg-orange">
+      Tablas de la maravillosa página de la práctica 3
+    </header>
+    <div class="container">
+      <div
+        class="col justify-center align-center"
+        style="height: 80vh; width: auto"
+      >
+        <table>
+          <tr>
+            <th>Ciudad</th>
+            <th>Temperatura (º)</th>
+            <th>Humedad (%)</th>
+            <th>Ruido</th>
+            <th>Nivel de luz</th>
+            <th>Color de Iluminación</th>
+          </tr>
+        </table>
+        <div class="my-4">
+          <span class="button mx-2" onclick="renderTable(0)"> Pagina 1 </span>
+          <span class="button mx-2" onclick="renderTable(1)"> Pagina 2 </span>
+          <span class="button mx-2" onclick="renderTable(2)"> Pagina 3 </span>
+          <span class="button mx-2" onclick="renderTableXML()"> Pagina 4 </span>
+          <span class="button mx-2" onclick="renderTableJSON()">
+            Pagina 5
+          </span>
+        </div>
+      </div>
+      <div class="nav" style="position: fixed; bottom: 42px">
+        <a href="index.html" class="link">Volver a página principal</a>
+      </div>
+    </div>
+    <footer class="text-center">Universidad de Alcalá</footer>
+  </body>
+
+  <script>
+    let actualPage = 0;
+    // Mejora: Elegir el numero de filas en la tabla, podría ser cambiado dinámicamente
+    const tableRowsNumber = 5;
+
+    const cities = [
+      {
+        name: "Alcalá de H.",
+      },
+      {
+        name: "Almería",
+      },
+      {
+        name: "Alicante",
+      },
+      {
+        name: "Albacete",
+      },
+      {
+        name: "Badajoz",
+      },
+      {
+        name: "Barcelona",
+      },
+      {
+        name: "Bilbao",
+      },
+      {
+        name: "Burgos",
+      },
+      {
+        name: "Cádiz",
+      },
+      {
+        name: "Cáceres",
+      },
+      {
+        name: "Castellón",
+      },
+      {
+        name: "Córdoba",
+      },
+      {
+        name: "Ciudad Real",
+      },
+      {
+        name: "Cartagena",
+      },
+      {
+        name: "Estepona",
+      },
+    ];
+
+    const randomValue = (min, max) => {
+      return Math.floor(Math.random() * (max - min) + min);
+    };
+    const randomColor = () =>
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .toUpperCase();
+
+    const renderTable = (actualPage, firstRender = false) => {
+      // Mejora: Animación al cambiar de página
+      $("table").fadeToggle(0);
+
+      if (!firstRender) {
+        for (let i = 0; i < tableRowsNumber; i++) {
+          $("table").find("tr").last().remove();
+        }
+      }
+      for (
+        let i = actualPage * tableRowsNumber;
+        i < actualPage * tableRowsNumber + tableRowsNumber;
+        i++
+      ) {
+        const element = `
+            <tr>
+              <td>${cities[i].name}</td>
+              <td>${cities[i].temp}</td>
+              <td>${cities[i].hum}</td>
+              <td>${cities[i].noise}</td>
+              <td>${cities[i].light}</td>
+              <td>${cities[i].color}</td>
+            </tr>
+              `;
+        $("table").append(element);
+      }
+
+      $("table").fadeToggle(750);
+    };
+
+    const renderTableXML = () => {
+      $("table").fadeToggle(0);
+
+      $.ajax({
+        type: "GET",
+        url: "data/citiesData.xml",
+        dataType: "xml",
+      }).done((xmlDoc) => {
+        for (let i = 0; i < tableRowsNumber; i++) {
+          $("table").find("tr").last().remove();
+        }
+        for (let i = 0; i < tableRowsNumber; i++) {
+          const city = xmlDoc.getElementsByTagName("City")[i];
+          const element = `
+            <tr>
+              <td>${$(city).find("Name").text()}</td>
+              <td>${$(city).find("Temp").text()}</td>
+              <td>${$(city).find("Hum").text()}</td>
+              <td>${$(city).find("Noise").text()}</td>
+              <td>${$(city).find("Light").text()}</td>
+              <td>${$(city).find("Color").text()}</td>
+              </tr>
+              `;
+          $("table").append(element);
+        }
+        $("table").fadeToggle(750);
+      });
+    };
+
+    const renderTableJSON = () => {
+      $("table").fadeToggle(0);
+
+      $.ajax({
+        type: "GET",
+        url: "data/citiesData.json",
+        dataType: "json",
+      }).done((jsonDoc) => {
+        for (let i = 0; i < tableRowsNumber; i++) {
+          $("table").find("tr").last().remove();
+        }
+        for (let i = 0; i < tableRowsNumber; i++) {
+          const element = `
+            <tr>
+              <td>${jsonDoc[i].name}</td>
+              <td>${jsonDoc[i].temp}</td>
+              <td>${jsonDoc[i].hum}</td>
+              <td>${jsonDoc[i].noise}</td>
+              <td>${jsonDoc[i].light}</td>
+              <td>${jsonDoc[i].color}</td>
+              </tr>
+              `;
+          $("table").append(element);
+        }
+
+        $("table").fadeToggle(750);
+      });
+    };
+
+    (() => {
+      for (let i = 0; i < cities.length; i++) {
+        cities[i].temp = randomValue(10, 40);
+        cities[i].hum = randomValue(10, 100);
+        cities[i].noise = randomValue(20, 300);
+        cities[i].light = randomValue(20, 300);
+        cities[i].color = randomColor();
+      }
+
+      renderTable(0, true);
+    })();
+  </script>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" manifest="manifest.appcache">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nombre</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="text-center bg-orange">
+      Nombre de la maravillosa página de la práctica 3
+    </header>
+    <div class="container">
+      <form class="row" id="form">
+        <div class="col">
+          <span class="title text-green">Aquí puedes modificar el nombre</span>
+          <div class="row my-3 align-center">
+            <label for="fname">Nombre:</label>
+            <input type="text" id="fname" name="fname" />
+          </div>
+          <div class="row my-3 align-center">
+            <label for="femail">Email:</label>
+            <input type="text" id="femail" name="femail" />
+          </div>
+          <!-- Submit Button -->
+          <input
+            class="button mx-auto my-3"
+            type="submit"
+            value="Submit"
+            onclick="submitData()"
+          />
+          <div class="row my-3 text-center" id="result"></div>
+        </div>
+      </form>
+
+      <div class="nav" style="position: fixed; bottom: 42px">
+        <a href="index.html" class="link">Volver a página principal</a>
+      </div>
+    </div>
+    <footer class="text-center">Universidad de Alcalá</footer>
+  </body>
+
+  <script>
+    const nameElement = document.getElementById("fname");
+    const resultElement = document.getElementById("result");
+
+    const submitData = () => {
+      const name = nameElement.value;
+      try {
+        if (name === "" || !name.trim().length)
+          throw "El campo nombre no puede estar vacío";
+        throw "El campo nombre no puede estar vacío";
+        localStorage.setItem("@name", name);
+        resultElement.classList.remove("text-red"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-green");
+        resultElement.innerHTML = "Nombre guardado correctamente";
+      } catch (e) {
+        resultElement.classList.add("text-green"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-red");
+        resultElement.innerHTML = "Error guardando nombre<br>" + e;
+      }
+    };
+
+    // Prevent form from reloading page
+    const form = document.getElementById("form");
+    const handleForm = (event) => {
+      event.preventDefault();
+    };
+    form.addEventListener("submit", handleForm);
+
+    // Get name stored
+    try {
+      const name = localStorage.getItem("@name");
+      nameElement.value = name;
+    } catch (e) {
+      console.log(e);
+    }
+
+    // Check email only JS
+    const checkEmailJS = ({ target: { value } }) => {
+      let ok = false;
+      try {
+        // Split using @ character
+        const str = value.split("@");
+        const username = str[0];
+        // Split the second part using . character to separate domain from TLD
+        const domainTLD = str[1].split(".");
+        const domain = domainTLD[0];
+        const tld = domainTLD[1];
+        // If nothing is undefined it's correct
+        if (username && domain && tld) ok = true;
+        else ok = false;
+      } catch (e) {
+        ok = false;
+      }
+
+      if (ok) {
+        resultElement.classList.remove("text-red"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-green");
+        resultElement.innerHTML = "Email válido";
+      } else {
+        resultElement.classList.add("text-green"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-red");
+        resultElement.innerHTML = "Email inválido";
+      }
+    };
+
+    // Check email RegEx
+    const checkEmailRX = ({ target: { value } }) => {
+      /**
+       * ^     : String start
+       * \w    : Match any word character
+       * \.    : Match the . character
+       * +     : Match all times posible
+       * @     : Match the @ character
+       * {2,4} : Match between 2 and 4 characters, TLD domains are .co, .com, .tech for example
+       */
+      const ok = value.match(/^[\w\.]+@([\w]+\.)+[\w]{2,4}$/gm);
+
+      if (ok) {
+        resultElement.classList.remove("text-red"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-green");
+        resultElement.innerHTML = "Email válido";
+      } else {
+        resultElement.classList.add("text-green"); // Removing a class that does not exist, does NOT throw an error
+        resultElement.classList.add("text-red");
+        resultElement.innerHTML = "Email inválido";
+      }
+    };
+
+    // Email Listener
+    const emailElement = document.getElementById("femail");
+    emailElement.addEventListener("input", checkEmailRX);
+  </script>
+</html>

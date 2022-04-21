@@ -1,0 +1,243 @@
+/* Colors Variables */
+
+:root {
+  --color-orange: #fc8702;
+  --color-green: #21bca5;
+  --color-blue: #0582ca;
+  --color-grey: #f4f4f4;
+  --color-grey-alt: #f9f9f9f4;
+  --color-dark-blue: #1f2348;
+  --color-red: #d94432;
+}
+
+/* General CSS */
+
+html {
+  font-family: "Open Sans", sans-serif;
+}
+
+header {
+  font-size: 24px;
+  color: var(--color-dark-blue);
+  background-color: var(--color-grey);
+  padding: 10px 0;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+}
+
+footer {
+  color: #264653;
+  background-color: var(--color-grey);
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.container {
+  color: #051033;
+  background-color: #ffffff;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+}
+
+.nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  background-color: var(--color-blue);
+  padding: 10px;
+}
+
+.link {
+  color: var(--color-grey);
+}
+
+.info {
+  display: flex;
+  width: 100%;
+  background-color: var(--color-orange);
+  padding: 10px;
+  font-weight: 600;
+}
+
+.title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Colors */
+
+.bg-orange {
+  background-color: var(--color-orange);
+  color: var(--color-grey);
+}
+
+.text-grey {
+  color: var(--color-grey-alt);
+}
+
+.text-green {
+  color: var(--color-green);
+}
+
+.text-red {
+  color: var(--color-red);
+}
+
+/* Padding and Margin */
+
+.px-2 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.px-4 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.py-2 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.mx-2 {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.my-1 {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.my-2 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.my-3 {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.my-4 {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Table CSS */
+
+table {
+  border-collapse: collapse;
+}
+
+td,
+th {
+  padding: 8px 24px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color: #d3d3d3;
+}
+
+/* Form */
+
+label,
+input {
+  width: 50%;
+  max-width: 220px;
+  text-align: center;
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
+
+/* Button */
+
+.button {
+  padding: 0.5em;
+  border: 0.1em solid #cacaca;
+  border-radius: 0.45em;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--color-dark-blue);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.button:hover {
+  color: var(--color-grey);
+  background-color: var(--color-dark-blue);
+}
+
+/* Flex */
+
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+/* Custom Cursor */
+.cursor {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  border-radius: 50%;
+  position: absolute;
+  animation: cursorAnim 0.5s infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes cursorAnim {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.4);
+  }
+}

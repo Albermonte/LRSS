@@ -1,16 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" manifest="manifest.appcache">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Práctica 1</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LRSS Web</title>
-</head>
+  <body>
+    <header class="text-center">Maravillosa página de la práctica 1</header>
+    <div class="container">
+      <div class="row">
+        <div class="nav">
+          <a href="minombre.html" class="link">Nombre</a>
+          <a href="config.html" class="link">Configuración</a>
+          <a href="galeria.html" class="link">Galería</a>
+          <a href="tablas.html" class="link">Tablas</a>
+        </div>
+        <div class="info text-grey">
+          <span> Información: </span>
+          <marquee
+            style="font-weight: 400; margin-left: 10px; width: 80%"
+            id="infoName"
+          >
+            Ningún nombre guardado aún
+          </marquee>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span class="title text-green">Datos de la habitación</span>
+          <ul>
+            <li>Pais: España</li>
+            <li>Ciudad: Alcalá de Henares</li>
+            <li>Localización: 40.514223, -3.348577</li>
+            <li>
+              <a href="https://goo.gl/maps/Recey8cAHPFqvVeZ8">Google Maps</a>
+            </li>
+          </ul>
+          <img class="mx-auto my-2" src="./images/habitacion.jpg" width="50%" />
+        </div>
+        <div class="col">
+          <span class="title text-green">Datos de los sensores</span>
+          <table class="mx-auto my-3">
+            <tr>
+              <td>Temperatura (º)</td>
+              <td>25</td>
+            </tr>
+            <tr>
+              <td>Humedad (%)</td>
+              <td>30</td>
+            </tr>
+            <tr>
+              <td>Nivel de Ruido</td>
+              <td>115</td>
+            </tr>
+            <tr>
+              <td>Nivel de luz</td>
+              <td>225</td>
+            </tr>
+            <tr>
+              <td>Movimiento</td>
+              <td>Sí</td>
+            </tr>
+            <tr>
+              <td>Color iluminación</td>
+              <td>FF00FF</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="cursor" id="cursor"></div>
+    <footer class="text-center">Universidad de Alcalá</footer>
+  </body>
 
-<body>
-    <h1>Hola</h1>
-    <img src="./images/undraw_Online_art_re_f1pk.png" alt="">
-</body>
+  <script>
+    // Get name stored
+    try {
+      const name = localStorage.getItem("@name");
+      if (!name) throw "No name";
+      const infoElement = document.getElementById("infoName");
+      infoElement.innerHTML = `Hola ${name}: Bienvenido a smartroom.`;
+    } catch (e) {
+      console.log(e);
+    }
 
+    /**
+     * Mejoras:
+     *  Marquee
+     *  Puntero que sigue a ratón
+     *  Localización
+     */
+
+    // Custom Cursor
+    const cursor = document.getElementById("cursor");
+
+    document.addEventListener("mousemove", (e) => {
+      cursor.setAttribute(
+        "style",
+        "top: " + (e.pageY - 10) + "px; left: " + (e.pageX - 10) + "px;"
+      );
+    });
+  </script>
 </html>
