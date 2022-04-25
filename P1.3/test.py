@@ -2,7 +2,7 @@ import requests
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-CONNECTIONS = 10000
+CONNECTIONS = 5000
 list_of_urls = []
 for i in range(CONNECTIONS):
     list_of_urls.append("http://localhost:3000/test")
