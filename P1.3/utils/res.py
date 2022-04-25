@@ -14,7 +14,8 @@ class Res:
     regex_js = re.compile(r"js")
     regex_json = re.compile(r"json")
     regex_xml = re.compile(r"xml")
-    headers = "HTTP/1.1 200 OK\nServer: LRSS/1.0.0\n"
+    http_ver = "HTTP/1.0"
+    headers = f"{http_ver} 200 OK\nServer: LRSS/1.0.0\n"
 
     def __init__(self, conn: socket):
         self.conn = conn
@@ -47,12 +48,12 @@ class Res:
 
     def not_found(self):
         body = "<html><body>404 Not Found</body></html>"
-        headers = f"HTTP/1.1 404 Not Found\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
+        headers = f"{self.http_ver} 404 Not Found\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
         self.conn.sendall(bytes(headers + body, "utf-8"))
         return
 
     def test(self):
         body = "<html><body>Hello World</body></html>"
-        headers = f"HTTP/1.1 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
+        headers = f"{self.http_ver} 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
         self.conn.sendall(bytes(headers + body, "utf-8"))
         return
