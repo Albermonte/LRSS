@@ -1,8 +1,8 @@
 import sys
 import signal
 import socket
-import select
 import re
+
 from utils.res import Res
 
 
@@ -40,11 +40,12 @@ sock.bind(server_address)
 print("Listening...")
 sock.listen()
 
+
 while True:
     conn, addr = sock.accept()
     req = conn.recv(RECV_BUFFER).decode()
-    res = Res(conn)
-    # print(req)
+    res = Res(conn)    
+    
     result = re.search('GET (.*) HTTP/', req)
     if not result:
         res.not_found()

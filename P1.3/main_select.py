@@ -3,6 +3,7 @@ import signal
 import socket
 import select
 import re
+
 from utils.res import Res
 
 
@@ -12,6 +13,8 @@ if len(sys.argv) < 2:
 
 RECV_BUFFER = 1024
 PORT = int(sys.argv[1])
+# Timeout in seconds
+TIMEOUT = 10
 print(f"Running server on Port: {PORT}")
 
 # Create socket
@@ -39,13 +42,14 @@ sock.bind(server_address)
 
 print("Listening...")
 sock.listen()
+is_timeout = False
 
 # List of sockets for select.select()
 sockets_list = [sock]
 
 while True:
     read_sockets, _, exception_sockets = select.select(
-        sockets_list, [], sockets_list)
+        sockets_list, [], sockets_list, TIMEOUT)
 
     notified_socket: socket.socket
     for notified_socket in read_sockets:
@@ -58,9 +62,11 @@ while True:
             sockets_list.append(client_socket)
 
         else:
+            is_timeout = False
+
             req = notified_socket.recv(RECV_BUFFER).decode()
             res = Res(notified_socket)
-            # print(req)
+
             result = re.search('GET (.*) HTTP/', req)
             if not result:
                 res.not_found()
@@ -87,6 +93,11 @@ while True:
     for notified_socket in exception_sockets:
         # Remove from list for socket.socket()
         sockets_list.remove(notified_socket)
+
+    if not (read_sockets or exception_sockets):
+        if not is_timeout:
+            print("Servidor web inactivo")
+            is_timeout = True
 
 
 # Source:
