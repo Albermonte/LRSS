@@ -1,3 +1,5 @@
+# main.py
+
 import sys
 import signal
 import socket
@@ -46,22 +48,19 @@ while True:
     req = conn.recv(RECV_BUFFER).decode()
     res = Res(conn)    
     
+    # Check if request is valid
     result = re.search('GET (.*) HTTP/', req)
     if not result:
         res.not_found()
         conn.close()
         continue
 
+    # Get requested file and redirect to index.html if no file requested
     req_file = result.group(1)
     if req_file == "/":
         req_file = "/index.html"
 
-    # Línea de estado que contiene la versión del protocolo HTTP (por ejemplo, versión 1.0), el código de
-    # respuesta (por ejemplo 200) y una palabra/frase explicativa.
-    # Una serie de cabeceras HTTP.
-    # Una línea en blanco.
-    # Objeto solicitado, en caso de que exista
-
+    # Get the file from public folder
     filename = "./public" + req_file
     res.send(filename)
 

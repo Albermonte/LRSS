@@ -1,3 +1,5 @@
+# main_select.py
+
 import sys
 import signal
 import socket
@@ -62,13 +64,16 @@ while True:
             sockets_list.append(client_socket)
 
         else:
+            # We are active so no restart timeout
             is_timeout = False
 
             req = notified_socket.recv(RECV_BUFFER).decode()
 
+            # Check if keep-alive header is present
             keep_alive = re.search('Connection: keep-alive', req)
             res = Res(notified_socket, "HTTP/1.1", not not keep_alive)
 
+            # Check if request is valid
             result = re.search('(GET|HEAD)(.*) HTTP/', req)
             if not result:
                 res.not_found()
@@ -76,19 +81,25 @@ while True:
                 sockets_list.remove(notified_socket)
                 continue
 
+            # Remove first space from regex result
             req_file = result.group(2).lstrip()
 
+            # Get requested file and redirect to index.html if no file requested
             if req_file == "/":
                 req_file = "/index.html"
+            # If not found, send 404
             elif not req_file:
                 # Default 404 file if none present in public folder
                 req_file = "/404.html"
 
 
             filename = "./public" + req_file
+            # Check if request method is HEAD and send only the headers
             head_only = result.group(1) == "HEAD"
             r = res.send(filename, not not head_only)
 
+            # If keep-alive header is not present, close the socket
+            # If send returned -1 (file not found), close the socket
             if not keep_alive or r == -1:
                 notified_socket.close()
                 sockets_list.remove(notified_socket)
@@ -100,6 +111,7 @@ while True:
     if not (read_sockets or exception_sockets):
         if not is_timeout:
             print("Servidor web inactivo")
+            # Timeout to true to not send the innactive message every 10 seconds
             is_timeout = True
             for notified_socket in sockets_list:
                 if notified_socket != sock:
