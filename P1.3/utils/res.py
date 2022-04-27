@@ -17,8 +17,11 @@ class Res:
     http_ver = "HTTP/1.0"
     headers = f"{http_ver} 200 OK\nServer: LRSS/1.0.0\n"
 
-    def __init__(self, conn: socket):
+    def __init__(self, conn: socket, ver = "HTTP/1.0", keep_alive = False):
         self.conn = conn
+        self.http_ver = ver
+        self.keep_alive = keep_alive
+        print(f"New connection from {conn.getpeername()}, version: {self.http_ver}, keep alive: {self.keep_alive}")
 
     def send(self, file):
         if os.path.exists(file):
@@ -39,7 +42,7 @@ class Res:
                 elif re.findall(self.regex_xml, file):
                     self.headers += f"Content-type: application/xml\n"
 
-            self.headers += f"Content-length: {os.path.getsize(file)}\nConnection: close\n\n"
+            self.headers += f"Content-length: {os.path.getsize(file)}\nConnection: {'keep-alive' if self.keep_alive else 'close'}\n\n"
             self.conn.sendall(bytes(self.headers, "utf-8"))
             self.conn.sendall(bytes(open(file, "rb").read()))
         else:

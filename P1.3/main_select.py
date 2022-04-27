@@ -65,14 +65,15 @@ while True:
             is_timeout = False
 
             req = notified_socket.recv(RECV_BUFFER).decode()
-            res = Res(notified_socket)
-
             result = re.search('GET (.*) HTTP/', req)
             if not result:
                 res.not_found()
                 notified_socket.close()
                 sockets_list.remove(notified_socket)
                 continue
+
+            keep_alive = re.search('Connection: keep-alive', req)
+            res = Res(notified_socket, "HTTP/1.1", not not keep_alive)
 
             req_file = result.group(1)
             if req_file == "/":
@@ -87,8 +88,9 @@ while True:
             filename = "./public" + req_file
             res.send(filename)
 
-            notified_socket.close()
-            sockets_list.remove(notified_socket)
+            if not keep_alive:
+                notified_socket.close()
+                sockets_list.remove(notified_socket)
 
     for notified_socket in exception_sockets:
         # Remove from list for socket.socket()
@@ -98,6 +100,10 @@ while True:
         if not is_timeout:
             print("Servidor web inactivo")
             is_timeout = True
+            for notified_socket in sockets_list:
+                if notified_socket != sock:
+                    notified_socket.close()
+                    sockets_list.remove(notified_socket)
 
 
 # Source:
