@@ -65,30 +65,31 @@ while True:
             is_timeout = False
 
             req = notified_socket.recv(RECV_BUFFER).decode()
-            result = re.search('GET (.*) HTTP/', req)
+
+            keep_alive = re.search('Connection: keep-alive', req)
+            res = Res(notified_socket, "HTTP/1.1", not not keep_alive)
+
+            result = re.search('(GET|HEAD)(.*) HTTP/', req)
             if not result:
                 res.not_found()
                 notified_socket.close()
                 sockets_list.remove(notified_socket)
                 continue
 
-            keep_alive = re.search('Connection: keep-alive', req)
-            res = Res(notified_socket, "HTTP/1.1", not not keep_alive)
+            req_file = result.group(2).lstrip()
 
-            req_file = result.group(1)
             if req_file == "/":
                 req_file = "/index.html"
+            elif not req_file:
+                # Default 404 file if none present in public folder
+                req_file = "/404.html"
 
-            # Línea de estado que contiene la versión del protocolo HTTP (por ejemplo, versión 1.0), el código de
-            # respuesta (por ejemplo 200) y una palabra/frase explicativa.
-            # Una serie de cabeceras HTTP.
-            # Una línea en blanco.
-            # Objeto solicitado, en caso de que exista
 
             filename = "./public" + req_file
-            res.send(filename)
+            head_only = result.group(1) == "HEAD"
+            r = res.send(filename, not not head_only)
 
-            if not keep_alive:
+            if not keep_alive or r == -1:
                 notified_socket.close()
                 sockets_list.remove(notified_socket)
 

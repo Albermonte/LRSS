@@ -23,7 +23,7 @@ class Res:
         self.keep_alive = keep_alive
         print(f"New connection from {conn.getpeername()}, version: {self.http_ver}, keep alive: {self.keep_alive}")
 
-    def send(self, file):
+    def send(self, file, head_only = False):
         if os.path.exists(file):
             self.headers += f"Date: {datetime.datetime.now()}\n"
             is_html = re.findall(self.regex_html, file)
@@ -44,19 +44,20 @@ class Res:
 
             self.headers += f"Content-length: {os.path.getsize(file)}\nConnection: {'keep-alive' if self.keep_alive else 'close'}\n\n"
             self.conn.sendall(bytes(self.headers, "utf-8"))
-            self.conn.sendall(bytes(open(file, "rb").read()))
+            if not head_only:
+                self.conn.sendall(bytes(open(file, "rb").read()))
         else:
-            self.not_found()
-        return
+            return self.not_found()
+        return 0
 
     def not_found(self):
         body = "<html><body>404 Not Found</body></html>"
         headers = f"{self.http_ver} 404 Not Found\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
         self.conn.sendall(bytes(headers + body, "utf-8"))
-        return
+        return -1
 
     def test(self):
         body = "<html><body>Hello World</body></html>"
         headers = f"{self.http_ver} 200 OK\nDate: {datetime.datetime.now()}\nServer: LRSS/1.0.0\nContent-type: text/html\nContent-length: {sys.getsizeof(body)}\nConnection: close\n\n"
         self.conn.sendall(bytes(headers + body, "utf-8"))
-        return
+        return 0
