@@ -20,13 +20,14 @@ class Res:
     http_ver = "HTTP/1.0"
     headers = f"{http_ver} 200 OK\nServer: LRSS/1.0.0\n"
 
-    def __init__(self, conn: socket, ver = "HTTP/1.0", keep_alive = False):
+    def __init__(self, conn: socket, ver="HTTP/1.0", keep_alive=False):
         self.conn = conn
         self.http_ver = ver
         self.keep_alive = keep_alive
-        # print(f"New connection from {conn.getpeername()}, version: {self.http_ver}, keep alive: {self.keep_alive}")
+        print(
+            f"New connection from {conn.getpeername()}, version: {self.http_ver}, keep alive: {self.keep_alive}")
 
-    def send(self, file, head_only = False):
+    def send(self, file, head_only=False):
         # Check if file exists
         if os.path.exists(file):
             self.headers += f"Date: {datetime.datetime.now()}\n"
@@ -44,6 +45,8 @@ class Res:
                 self.headers += f"Content-type: application/json\n"
             elif re.findall(self.regex_xml, file):
                 self.headers += f"Content-type: application/xml\n"
+            else:
+                self.headers += f"Content-type: application/octet-stream\n"
 
             # Set lenght header
             # Set connection header, important for keep-alive
